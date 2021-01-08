@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const gallery = document.getElementById('gallery');
     let cards = document.querySelectorAll('.card');
     let modals = document.querySelectorAll('.modal-container');
+    // List of states used by onvertStateToAbbr function
     const _MapFullNameAbbr = {"arizona":"AZ","alabama":"AL","alaska":"AK","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","districtofcolumbia":"DC","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","newhampshire":"NH","newjersey":"NJ","newmexico":"NM","newyork":"NY","northcarolina":"NC","northdakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhodeisland":"RI","southcarolina":"SC","southdakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","westvirginia":"WV","wisconsin":"WI","wyoming":"WY","alberta":"AB","britishcolumbia":"BC","manitoba":"MB","newbrunswick":"NB","newfoundland":"NF","northwestterritory":"NT","novascotia":"NS","nunavut":"NU","ontario":"ON","princeedwardisland":"PE","quebec":"QC","saskatchewan":"SK","yukon":"YT"};
 
 
+    // API call fetch employees data and returns it in JSON.
     const data = fetch(url)
         .then(res => res.json())
         .then((data) => {
@@ -17,18 +19,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     
-
+    // Main function. Wait for data then calls all generator on the page.
     async function generateHTML() {
-
+        // Saves employees list to a variable. 
         const employees = await data;
         
         generateList(employees);
         generateCards(employees);
-        createSearchBar(employees);
+        generateSearchBar(employees);
         generateModals(employees);
     
     }
-    
+
+    // Function used to save the initial state of the employees list. It will be used by the search bar. Accepts an array as params.
     let initialList = [];
     function generateList(employees) {
         employees.forEach((user) => {
@@ -36,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Generate each employees cards on the main page. Accepts an array as params.
     function generateCards(employees) {
         employees.forEach( (user, index) => {
                 const html = `
@@ -52,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             gallery.insertAdjacentHTML('beforeend', html);
         });
+        // Adds a click listener on the entire card to open/show the user's modal.
         cards = document.querySelectorAll('.card');
         cards.forEach((card) => {
             card.addEventListener('click', (e) => {
@@ -61,9 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     }
 
+    // Function that generate all modals with buttons for each user. Accepts an array as params.
     function generateModals(employees) {
-        const regexPhone = /^\D*(\d{3})\D*(\d{3})\D*(\d{4})\D*$/;
-        const regexDOB = /^(\d{4})\D(\d{2})\D(\d{2}).+/;
         
         employees.forEach((user, index) => {
             const modalHTML = `
@@ -76,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="modal-text">${user.email}</p>
                         <p class="modal-text cap">${user.location.city}</p>
                         <hr>
-                        <p class="modal-text">${user.cell.replace(regexPhone,'($1) $2-$3')}</p>
+                        <p class="modal-text">${formatPhone(user.cell)}</p>
                         <p class="modal-text">${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${convertStateToAbbr(user.location.state)} ${user.location.postcode}</p>
-                        <p class="modal-text">Birthday: ${user.dob.date.replace(regexDOB, '$2/$3/$1')}</p>
+                        <p class="modal-text">Birthday: ${formatDOB(user.dob.date)}</p>
                     </div>
                 </div>
                 <div class="modal-btn-container">
@@ -90,15 +94,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
         })
 
+         // Selects and hide modals on load
          modals = document.querySelectorAll('.modal-container');
          modals.forEach( (modal) => {
             modal.style.display = 'none';
         });
 
+        // Modals buttons selections
         const closeModalBtns = document.querySelectorAll('.modal-close-btn');
         const modalNextBtn = document.querySelectorAll('.modal-next');
         const modalPrevBtn = document.querySelectorAll('.modal-prev');
 
+        // Add click listener on the modal 'close' button.
         closeModalBtns.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 const userModal = document.getElementById(e.currentTarget.id.split('-')[0] + '_modal');
@@ -106,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Add click listener on the modal's 'next' button and add logic to show next modal on click.
         modalNextBtn.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 modals = document.querySelectorAll('.modal-container');
@@ -117,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Add click listener on the modal's 'previous' button and add logic to show previous modal on click.
         modalPrevBtn.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 const currentModalID = document.getElementById(e.currentTarget.parentElement.parentElement.id).id.split('_')[0];
@@ -128,9 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })
     }
-
-      
-    function createSearchBar(employees) {
+     
+    // Adds the searchbar html to the page. Accepts an array as params.
+    function generateSearchBar(employees) {
         const searchContainer = document.querySelector('.search-container');
         const html = `
         <form id="search-form" action="#" method="get">
@@ -140,14 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         searchContainer.insertAdjacentHTML('beforeend', html);
 
+        // Selects the form and the input
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         
-
+        // Adds a listener on the form 'submit' event to filter the results.
         searchForm.addEventListener('submit', (e) => {
             cards = document.querySelectorAll('.card');
             e.preventDefault();
             let filteredList = [];
+            // If search input is not empty, it filters and shows cards 
             if (searchInput.value) {
                 removeCards();
                 removeModals();
@@ -155,12 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fullName = `${user.name.first} ${user.name.last}`;
                     if (fullName.toLowerCase().includes(searchInput.value.toLowerCase())) {
                         filteredList.push(user);
-
                     }
-
                 });
                 generateCards(filteredList);
                 generateModals(filteredList);
+            // If search input is empty, it loads the entire original unfiltered content.
             } else {
                 removeCards();
                 removeModals();
@@ -173,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
+    // Helper function to remove all cards when needed.
     function removeCards() {
         cards = document.querySelectorAll('.card');
         cards.forEach((card) => {
@@ -181,11 +191,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper function to remove all modals when needed.
     function removeModals() {
         modals = document.querySelectorAll('.modal-container');
         modals.forEach( (modal) => {
             modal.remove();
         });
+    }
+
+    // Helper function to format phone number. Used in modals.
+    function formatPhone(number) {
+        const regexPhone = /^\D*(\d{3})\D*(\d{3})\D*(\d{4})\D*$/;
+        return number.replace(regexPhone, '($1) $2-$3');
+    }
+
+    // Helper function to format date of birth. Used in modals.
+    function formatDOB(date) {
+        const regexDOB = /^(\d{4})\D(\d{2})\D(\d{2}).+/;
+        return date.replace(regexDOB, '$2/$3/$1');
     }
 
     // Function to abbriviate the state in the modal
@@ -206,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     
 
+    // Main function call to generate all the elements of the page.
     generateHTML();
 
 });
