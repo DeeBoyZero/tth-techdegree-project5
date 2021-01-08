@@ -1,14 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     const url ='https://randomuser.me/api/?results=12&nat=us';
-    const body = document.querySelector('body');
     const gallery = document.getElementById('gallery');
-    // const cards = document.querySelectorAll('.card');
-    const modals = document.getElementsByClassName('modal-container');
-    const closeModalBtns = document.getElementsByClassName('modal-close-btn');
-    const modalNextBtn = document.getElementsByClassName('modal-next');
-    const modalPrevBtn = document.getElementsByClassName('modal-prev');
+    let cards = document.querySelectorAll('.card');
+    let modals = document.querySelectorAll('.modal-container');
     const _MapFullNameAbbr = {"arizona":"AZ","alabama":"AL","alaska":"AK","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","districtofcolumbia":"DC","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","newhampshire":"NH","newjersey":"NJ","newmexico":"NM","newyork":"NY","northcarolina":"NC","northdakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhodeisland":"RI","southcarolina":"SC","southdakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","westvirginia":"WV","wisconsin":"WI","wyoming":"WY","alberta":"AB","britishcolumbia":"BC","manitoba":"MB","newbrunswick":"NB","newfoundland":"NF","northwestterritory":"NT","novascotia":"NS","nunavut":"NU","ontario":"ON","princeedwardisland":"PE","quebec":"QC","saskatchewan":"SK","yukon":"YT"};
+
 
     const data = fetch(url)
         .then(res => res.json())
@@ -24,11 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateHTML() {
 
         const employees = await data;
+        
         generateList(employees);
         generateCards(employees);
         createSearchBar(employees);
         generateModals(employees);
-        // createListener(employees);
+    
     }
 
     function generateList(employees) {
@@ -53,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             gallery.insertAdjacentHTML('beforeend', html);
         });
-        const cards = document.querySelectorAll('.card');
+        cards = document.querySelectorAll('.card');
         cards.forEach((card) => {
             card.addEventListener('click', (e) => {
                 const userModal = document.getElementById(e.currentTarget.id.split('_')[0]+ '_modal');
@@ -67,45 +65,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const regexDOB = /^(\d{4})\D(\d{2})\D(\d{2}).+/;
         
         employees.forEach((user, index) => {
-                const modalHTML = `
-                <div class="modal-container" id=${index}_modal>
-                    <div class="modal">
-                        <button type="button" id="${index}-modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-                        <div class="modal-info-container">
-                            <img class="modal-img" src="${user.picture.large}" alt="profile picture">
-                            <h3 id="name" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
-                            <p class="modal-text">${user.email}</p>
-                            <p class="modal-text cap">${user.location.city}</p>
-                            <hr>
-                            <p class="modal-text">${user.cell.replace(regexPhone,'($1) $2-$3')}</p>
-                            <p class="modal-text">${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${convertStateToAbbr(user.location.state)} ${user.location.postcode}</p>
-                            <p class="modal-text">Birthday: ${user.dob.date.replace(regexDOB, '$2/$3/$1')}</p>
-                        </div>
-                    </div>
-                    <div class="modal-btn-container">
-                        <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-                        <button type="button" id="modal-next" class="modal-next btn">Next</button>
+            const modalHTML = `
+            <div class="modal-container" id=${index}_modal>
+                <div class="modal">
+                    <button type="button" id="${index}-modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+                    <div class="modal-info-container">
+                        <img class="modal-img" src="${user.picture.large}" alt="profile picture">
+                        <h3 id="name" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
+                        <p class="modal-text">${user.email}</p>
+                        <p class="modal-text cap">${user.location.city}</p>
+                        <hr>
+                        <p class="modal-text">${user.cell.replace(regexPhone,'($1) $2-$3')}</p>
+                        <p class="modal-text">${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${convertStateToAbbr(user.location.state)} ${user.location.postcode}</p>
+                        <p class="modal-text">Birthday: ${user.dob.date.replace(regexDOB, '$2/$3/$1')}</p>
                     </div>
                 </div>
-                `
-                document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
+                <div class="modal-btn-container">
+                    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+                    <button type="button" id="modal-next" class="modal-next btn">Next</button>
+                </div>
+            </div>
+            `
+            document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
         })
 
-        const modals = document.getElementsByClassName('modal-container');
-        Array.from(modals).forEach( (modal) => {
+         modals = document.querySelectorAll('.modal-container');
+         modals.forEach( (modal) => {
             modal.style.display = 'none';
         });
 
-        Array.from(closeModalBtns).forEach((btn) => {
+        const closeModalBtns = document.querySelectorAll('.modal-close-btn');
+        const modalNextBtn = document.querySelectorAll('.modal-next');
+        const modalPrevBtn = document.querySelectorAll('.modal-prev');
+
+        closeModalBtns.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 const userModal = document.getElementById(e.currentTarget.id.split('-')[0] + '_modal');
                 userModal.style.display = 'none';
             });
         });
 
-        Array.from(modalNextBtn).forEach((btn) => {
+        modalNextBtn.forEach((btn) => {
             btn.addEventListener('click', (e) => {
-                const modals = document.getElementsByClassName('modal-container');
+                modals = document.querySelectorAll('.modal-container');
                 const currentModalID = document.getElementById(e.currentTarget.parentElement.parentElement.id).id.split('_')[0];
                 if (+currentModalID < modals.length - 1) {
                     e.currentTarget.parentElement.parentElement.style.display = 'none';
@@ -114,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        Array.from(modalPrevBtn).forEach((btn) => {
+        modalPrevBtn.forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 const currentModalID = document.getElementById(e.currentTarget.parentElement.parentElement.id).id.split('_')[0];
                 if (+currentModalID > 0) {
@@ -142,13 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
 
         searchForm.addEventListener('submit', (e) => {
-            const cards = document.getElementsByClassName('card');
+            cards = document.querySelectorAll('.card');
             e.preventDefault();
             let filteredList = [];
             if (searchInput.value) {
                 removeCards();
                 removeModals();
-                employees.forEach((user, index) => {
+                employees.forEach((user) => {
                     const fullName = `${user.name.first} ${user.name.last}`;
                     if (fullName.toLowerCase().includes(searchInput.value.toLowerCase())) {
                         filteredList.push(user);
@@ -163,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 removeModals();
                 generateCards(initialList);
                 generateModals(initialList);
-                Array.from(cards).forEach((card, index) => {
+                cards.forEach((card) => {
                     card.style.display = 'inherit';
                 });
             }
@@ -172,14 +174,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function removeCards() {
-        const cards = document.querySelectorAll('.card');
+        cards = document.querySelectorAll('.card');
         cards.forEach((card) => {
             card.remove();
         });
     }
 
     function removeModals() {
-        const modals = document.querySelectorAll('.modal-container');
+        modals = document.querySelectorAll('.modal-container');
         modals.forEach( (modal) => {
             modal.remove();
         });
@@ -204,7 +206,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     generateHTML();
-    // addSearchListener();
-
 
 });
