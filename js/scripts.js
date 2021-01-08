@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
         });
 
-    let initialList = [];
+    
 
     async function generateHTML() {
 
@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         generateModals(employees);
     
     }
-
+    
+    let initialList = [];
     function generateList(employees) {
         employees.forEach((user) => {
             initialList.push(user);
