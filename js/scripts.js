@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(() => {
             gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
         });
-
     
     // Main function. Wait for data then calls all generator on the page.
     async function generateHTML() {
@@ -38,6 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
             initialList.push(user);
         });
     }
+
+    // **************************************************************  
+    // Main function call to generate all the elements of the page. *
+    // **************************************************************
+    
+    generateHTML();
+
+    // ******************
+    // Helper functions *
+    // ******************
 
     // Generate each employees cards on the main page. Accepts an array as params.
     function generateCards(employees) {
@@ -68,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function that generate all modals with buttons for each user. Accepts an array as params.
     function generateModals(employees) {
-        
         employees.forEach((user, index) => {
             const modalHTML = `
             <div class="modal-container" id=${index}_modal>
@@ -94,6 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
         })
 
+        disableModalBtns();
+
          // Selects and hide modals on load
          modals = document.querySelectorAll('.modal-container');
          modals.forEach( (modal) => {
@@ -118,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 modals = document.querySelectorAll('.modal-container');
                 const currentModalID = document.getElementById(e.currentTarget.parentElement.parentElement.id).id.split('_')[0];
+                if (+currentModalID === modals.length -1) {
+                    btn.style.visibility = 'hidden';
+                }
                 if (+currentModalID < modals.length - 1) {
                     e.currentTarget.parentElement.parentElement.style.display = 'none';
                     e.currentTarget.parentElement.parentElement.nextElementSibling.style.display = 'block';
@@ -132,11 +145,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (+currentModalID > 0) {
                     e.currentTarget.parentElement.parentElement.style.display = 'none';
                     e.currentTarget.parentElement.parentElement.previousElementSibling.style.display = 'block';
-                }
-
+                } 
             });
         })
     }
+
+    // Function that will disable 'previous' or 'next' button if first/last modal showed.
+    function disableModalBtns() {
+        modals = document.querySelectorAll('.modal-container');
+        modals.forEach((modal, index) => {
+            if (index === 0) {
+                document.getElementById(`${index}_modal`).querySelector('.modal-prev').disabled = true;
+            }
+            
+            if (index === modals.length - 1) {
+                document.getElementById(`${index}_modal`).querySelector('.modal-next').disabled = true;
+            }
+        });
+   }
+
+
      
     // Adds the searchbar html to the page. Accepts an array as params.
     function generateSearchBar(employees) {
@@ -211,9 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.replace(regexDOB, '$2/$3/$1');
     }
 
-    // Function to abbriviate the state in the modal
+    // Function to abbreviate the state in the modal. Accepts a string.
     // Code by yblee85 at https://gist.github.com/calebgrove/c285a9510948b633aa47
-
     function convertStateToAbbr(input) {
         
         if(input === undefined) return input;
@@ -227,9 +254,4 @@ document.addEventListener('DOMContentLoaded', () => {
         var foundAbbr = _MapFullNameAbbr[strStateToFind];
         return foundAbbr;
       }
-    
-
-    // Main function call to generate all the elements of the page.
-    generateHTML();
-
 });
