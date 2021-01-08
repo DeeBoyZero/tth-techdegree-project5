@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalNextBtn = document.getElementsByClassName('modal-next');
     const modalPrevBtn = document.getElementsByClassName('modal-prev');
     const _MapFullNameAbbr = {"arizona":"AZ","alabama":"AL","alaska":"AK","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","districtofcolumbia":"DC","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","newhampshire":"NH","newjersey":"NJ","newmexico":"NM","newyork":"NY","northcarolina":"NC","northdakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhodeisland":"RI","southcarolina":"SC","southdakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","westvirginia":"WV","wisconsin":"WI","wyoming":"WY","alberta":"AB","britishcolumbia":"BC","manitoba":"MB","newbrunswick":"NB","newfoundland":"NF","northwestterritory":"NT","novascotia":"NS","nunavut":"NU","ontario":"ON","princeedwardisland":"PE","quebec":"QC","saskatchewan":"SK","yukon":"YT"};
-    
 
     function checkStatus(response) {
         if (response.ok) {
@@ -18,27 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-    function getEmployees(url) {
-        return fetch(url)
-        .then(checkStatus)
+    const data = fetch(url)
         .then(res => res.json())
-        // .then(res => console.log(res))
-        .then(res => generateHTML(res))
-        .then(res => generateModal(res))
-        .then(createSearchBar)
-        .then(createListener)
-        .catch(error => {
-            gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
-            console.log(error);
+        .then((data) => {
+            return data.results;
         })
-    }
+        .catch(() => {
+            gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
+        });
 
-    function generateHTML(data) {
-        const html = data.results.map( (user, index) => `
+    async function generateHTML() {
+        const employees = await data;
+        const html = await employees.map( (user, index) => `
             <div class="card" id=${index}_card>
                 <div class="card-img-container">
-                    <img class="card-img" src="${user.picture.large}" alt="profile picture">
+                    <img class="card-img" src="${user.picture.medium}" alt="profile picture">
                 </div>
                 <div class="card-info-container">
                     <h3 id="name" class="card-name cap">${user.name.first} ${user.name.last}</h3>
@@ -48,14 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `).join(' ');
         gallery.insertAdjacentHTML('beforeend', html);
-        return data.results;
+        createSearchBar();
+        await generateModal();
+        createListener();
     }
 
 
-    function generateModal(data) {
+    async function generateModal() {
+        const employees = await data;
         const regexPhone = /^\D*(\d{3})\D*(\d{3})\D*(\d{4})\D*$/;
         const regexDOB = /^(\d{4})\D(\d{2})\D(\d{2})/g;
-        const modalHTML = data.map( (user, index) => `
+        const modalHTML = await employees.map( (user, index) => `
         <div class="modal-container" id=${index}_modal>
             <div class="modal">
                 <button type="button" id="${index}-modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
@@ -83,13 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
         Array.from(modals).forEach( (modal) => {
             modal.style.display = 'none';
         });
-        
+
+        // createListener();
     }
     
     function createSearchBar() {
         const searchContainer = document.querySelector('.search-container');
         const html = `
-        <form action="#" method="get">
+        <form id="search-form" action="#" method="get">
             <input type="search" id="search-input" class="search-input" placeholder="Search...">
             <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
         </form>
@@ -97,7 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         searchContainer.insertAdjacentHTML('beforeend', html);
     }
 
-    function createListener() {
+    async function createListener() {
+        const employees = await data;
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
             
         Array.from(cards).forEach((card) => {
             card.addEventListener('click', (e) => {
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Array.from(modalNextBtn).forEach((btn) => {
             btn.addEventListener('click', (e) => {
                 const currentModalID = document.getElementById(e.currentTarget.parentElement.parentElement.id).id.split('_')[0];
-                if (+currentModalID < 11) {
+                if (+currentModalID < employees.length - 1) {
                     e.currentTarget.parentElement.parentElement.style.display = 'none';
                     e.currentTarget.parentElement.parentElement.nextElementSibling.style.display = 'block';
                 }
@@ -134,9 +134,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })
 
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (searchInput.value) {
+                
+                Array.from(cards).forEach((card, index) => {
+                    card.style.display = 'none';
+                    const cardName = document.querySelectorAll('#name')[index];
+                    if (cardName.textContent.toLowerCase().includes(searchInput.value.toLowerCase())) {
+                        card.style.display = 'inherit';
+                    } 
+                });
+            } else {
+                Array.from(cards).forEach((card, index) => {
+                        card.style.display = 'inherit';
+                });
+            }
+
+        });
 
     }
-
 
     // Function to abbriviate the state in the modal
     // Code by yblee85 at https://gist.github.com/calebgrove/c285a9510948b633aa47
@@ -157,8 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
 
-    getEmployees(url);
 
-
-
+    generateHTML();
 });
