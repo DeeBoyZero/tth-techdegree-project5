@@ -18,7 +18,7 @@
     .then(res => generateModal(res))
     .then(res => generateSearchBar(res))
     .catch((e) => {
-        console.log('Looks like there was a problem:', e); //Not required but useful to have the exact error message somewhere.
+        console.log('Looks like there was a problem:', e); // Not required but useful to have the exact error message somewhere.
         gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
     });
     
@@ -35,7 +35,7 @@
         }
     }
 
-    // Generate a card for each employees present in the list passed as an argument.
+    // Generate a card for each employees present in the list passed as an argument. Accept an array as params.
     function generateCards(employees) {
         removeCards();
         employees.forEach( (user, index) => {
@@ -68,7 +68,7 @@
         return employees;
     }
 
-    // Insert a blank modal container with buttons and event Listeners and hide it on load.
+    // Insert a blank modal container with buttons and event Listeners and hide it on load. Accept an array as params.
     function generateModal(employees) {
         removeModal();
         const modalHTML = `
@@ -161,6 +161,7 @@
         
         // Add a listener on the form 'submit' action. Generate cards and modal based on the search value.
         searchForm.addEventListener('submit', (e) => {
+            const errorMsg = document.getElementById('error-msg');
             e.preventDefault();
             let filteredList = [];
             if (searchInput.value) {
@@ -172,16 +173,16 @@
                 });
                 if (filteredList.length === 0) {
                     // Show an error message if no user was found.
-                    document.getElementById('error-msg').innerText = 'Sorry, no result found.';
+                    errorMsg.innerText = 'Sorry, no result found.';
                     removeCards();
                 } else {
-                    document.getElementById('error-msg').innerText = '';
+                    errorMsg.innerText = '';
                     generateCards(filteredList);
                     generateModal(filteredList);
                 }
             } else {
                 // If search value is blank, it regenerates the cards and modal.
-                document.getElementById('error-msg').innerText = '';
+                errorMsg.innerText = '';
                 generateCards(employees);
                 generateModal(employees);
             }
