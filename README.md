@@ -16,5 +16,6 @@
 - Added Logo in the Header
 - Changed font
 - Added a scale transition on card mouse over.
+- Add a function to abbreviate the state displaying in the modal (thanks to yblee85 at https://gist.github.com/calebgrove/c285a9510948b633aa47)
 
 

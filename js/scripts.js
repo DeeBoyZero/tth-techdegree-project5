@@ -1,6 +1,6 @@
-    
     const url ='https://randomuser.me/api/?results=12&nat=us';
     const gallery = document.getElementById('gallery');
+    
     // List of states used by onvertStateToAbbr function
     const _MapFullNameAbbr = {"arizona":"AZ","alabama":"AL","alaska":"AK","arkansas":"AR","california":"CA","colorado":"CO","connecticut":"CT","districtofcolumbia":"DC","delaware":"DE","florida":"FL","georgia":"GA","hawaii":"HI","idaho":"ID","illinois":"IL","indiana":"IN","iowa":"IA","kansas":"KS","kentucky":"KY","louisiana":"LA","maine":"ME","maryland":"MD","massachusetts":"MA","michigan":"MI","minnesota":"MN","mississippi":"MS","missouri":"MO","montana":"MT","nebraska":"NE","nevada":"NV","newhampshire":"NH","newjersey":"NJ","newmexico":"NM","newyork":"NY","northcarolina":"NC","northdakota":"ND","ohio":"OH","oklahoma":"OK","oregon":"OR","pennsylvania":"PA","rhodeisland":"RI","southcarolina":"SC","southdakota":"SD","tennessee":"TN","texas":"TX","utah":"UT","vermont":"VT","virginia":"VA","washington":"WA","westvirginia":"WV","wisconsin":"WI","wyoming":"WY","alberta":"AB","britishcolumbia":"BC","manitoba":"MB","newbrunswick":"NB","newfoundland":"NF","northwestterritory":"NT","novascotia":"NS","nunavut":"NU","ontario":"ON","princeedwardisland":"PE","quebec":"QC","saskatchewan":"SK","yukon":"YT"};
 
@@ -18,13 +18,15 @@
     .then(res => generateModal(res))
     .then(res => generateSearchBar(res))
     .catch((e) => {
-        console.log('Looks like there was a problem:', e);
+        console.log('Looks like there was a problem:', e); //Not required but useful to have the exact error message somewhere.
         gallery.innerHTML = '<h2>Oops, there was a problem :(</h2>';
     });
     
     // ******************
     // Main functions *
     // ******************
+
+    // Check the status of the fetch call and generate a reject promise if the call failed.
     function checkStatus(response) {
         if (response.ok) {
           return Promise.resolve(response);
@@ -33,6 +35,7 @@
         }
     }
 
+    // Generate a card for each employees present in the list passed as an argument.
     function generateCards(employees) {
         removeCards();
         employees.forEach( (user, index) => {
@@ -52,40 +55,36 @@
         });
         
         // Adds a click listener on the entire card to open/show the user's modal.
-        cards = document.querySelectorAll('.card');
+        const cards = document.querySelectorAll('.card');
         cards.forEach((card) => {
             card.addEventListener('click', (e) => {
                 const userID = e.currentTarget.id.split('_')[0];
-                // if (document.querySelector('.modal-info-container')) {
                     removeModalData();
                     loadModalData(employees, employees[+userID]);
                     modalContainer = document.querySelector('.modal-container');
                     modalContainer.style.display = 'block';
-                // } else {
-                //     loadModalData(employees, employees[+userID]);
-                //     modalContainer = document.querySelector('.modal-container');
-                //     modalContainer.style.display = 'block';
-                // }
             });
         });
         return employees;
     }
 
+    // Insert a blank modal container with buttons and event Listeners and hide it on load.
     function generateModal(employees) {
         removeModal();
-            const modalHTML = `
-            <div class="modal-container">
-                <div class="modal">
-                    <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-                    <div class="modal-info-container"></div>
-                </div>
-                <div class="modal-btn-container">
-                    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-                    <button type="button" id="modal-next" class="modal-next btn">Next</button>
-                </div>
+        const modalHTML = `
+        <div class="modal-container">
+            <div class="modal">
+                <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+                <div class="modal-info-container"></div>
             </div>
-            `
-            document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
+            <div class="modal-btn-container">
+                <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+                <button type="button" id="modal-next" class="modal-next btn">Next</button>
+            </div>
+        </div>
+        `;
+        // Append the modal to body before script tags
+        document.getElementsByTagName('script')[0].insertAdjacentHTML('beforebegin', modalHTML);
 
         // Selects and hide modal on load
         const modalContainer = document.querySelector('.modal-container');
@@ -96,10 +95,12 @@
         const modalNextBtn = document.querySelector('.modal-next');
         const modalPrevBtn = document.querySelector('.modal-prev');
 
+        // Add a listener to close the modal container on click
         closeModalBtn.addEventListener('click', (e) => {
             modalContainer.style.display = 'none';
         });
 
+        // Add click listener on the modal's 'next' button and add logic to show next modal on click.
         modalNextBtn.addEventListener('click', () => {
             const currentUser = getCurrentUser();
             if (currentUser != employees.length - 1) {
@@ -116,10 +117,10 @@
                 loadModalData(employees, employees[prevUser]);
             }
         });
-
         return employees;
     }
 
+    // Load a modal with the informations of the user passed as an argument. Accepts a list first to find the index of the user.
     function loadModalData(employees, user) {
         const html = `
         <div class="modal-info-container" data-user-id="${employees.indexOf(user)}">
@@ -158,6 +159,7 @@
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         
+        // Add a listener on the form 'submit' action. Generate cards and modal based on the search value.
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             let filteredList = [];
@@ -165,19 +167,19 @@
                 employees.forEach((user) => {
                     const fullName = `${user.name.first} ${user.name.last}`;
                     if (fullName.toLowerCase().includes(searchInput.value.toLowerCase())) {
-                        // user.isFiltered = true;
                         filteredList.push(user);
                     }
                 });
                 if (filteredList.length === 0) {
+                    // Show an error message if no user was found.
                     document.getElementById('error-msg').innerText = 'Sorry, no result found.';
                     removeCards();
                 } else {
                     generateCards(filteredList);
                     generateModal(filteredList);
                 }
-
             } else {
+                // If search value is blank, it regenerates the cards and modal.
                 document.getElementById('error-msg').innerText = '';
                 generateCards(employees);
                 generateModal(employees);
@@ -188,40 +190,43 @@
     // ******************
     // Helper functions *
     // ******************
-
+  
+    // Get the current user index
     function getCurrentUser() {
         return parseInt(document.querySelector('.modal-info-container').getAttribute('data-user-id'));
     }
 
+    // Get the next user index
     function getNextUser() {
-        const userIndex = parseInt(document.querySelector('.modal-info-container').getAttribute('data-user-id'));
+        const userIndex = getCurrentUser();
         const nextUser = (userIndex + 1);
         return nextUser;
     }
 
+    // Get the previous user index
     function getPrevUser() {
-        const userIndex = parseInt(document.querySelector('.modal-info-container').getAttribute('data-user-id'));
+        const userIndex = getCurrentUser();
         const prevUser = (userIndex - 1);
         return prevUser;
     }
 
+    // Remove the modal data.
     function removeModalData() {
         const modalInfoContainer = document.querySelector('.modal-info-container');
         modalInfoContainer.remove();
     }
  
-    // Function that will disable 'previous' or 'next' button if first/last modal showed.
+    // Will disable 'previous' or 'next' button if first/last modal showed.
     function disableModalBtns(list) {
-        const modalInfo = document.querySelector('.modal-info-container');
         const modalNextBtn = document.querySelector('.modal-next');
-        if (+modalInfo.getAttribute('data-user-id') >= list.length - 1) {
+        if (getCurrentUser() >= list.length - 1) {
             modalNextBtn.disabled = true;
         } else {
             modalNextBtn.disabled = false;
         }
 
         const modalPrevBtn = document.querySelector('.modal-prev');
-        if (+modalInfo.getAttribute('data-user-id') === 0 ) {
+        if (getCurrentUser() === 0 ) {
             modalPrevBtn.disabled = true;
         } else {
             modalPrevBtn.disabled = false;
@@ -230,25 +235,26 @@
  
     // Helper function to remove all cards when needed.
     function removeCards() {
-        cards = document.querySelectorAll('.card');
-        cards.forEach((card) => {
+        const currentCards = document.querySelectorAll('.card');
+        currentCards.forEach((card) => {
             card.remove();
         });
     }
 
+    // Remove the modal container.
     function removeModal() {
         if (document.querySelector('.modal-container')) {
             document.querySelector('.modal-container').remove();
         }
     }
 
-    // Helper function to format phone number. Used in modals.
+    // Helper function to format phone number. Used in modal.
     function formatPhone(number) {
         const regexPhone = /^\D*(\d{3})\D*(\d{3})\D*(\d{4})\D*$/;
         return number.replace(regexPhone, '($1) $2-$3');
     }
 
-    // Helper function to format date of birth. Used in modals.
+    // Helper function to format date of birth. Used in modal.
     function formatDOB(date) {
         const regexDOB = /^(\d{4})\D(\d{2})\D(\d{2}).+/;
         return date.replace(regexDOB, '$2/$3/$1');
