@@ -2,7 +2,7 @@
    Public API Request
 ======================================== */
 
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
 
 * {
 	box-sizing: border-box;
@@ -14,7 +14,7 @@ html, body {
 }
 
 body {
-    font-family: "Nunito", sans-serif;
+    font-family: 'Indie Flower', cursive;
     text-align: center;
     background: rgba(235, 235, 235, 0.9);
 }
@@ -32,6 +32,7 @@ header h1 {
     font-size: 1.25em;
     color: rgba(50, 50, 50, 0.9);
     margin-top: 35px;
+    font-family: 'Indie Flower', cursive;
 }
 
 .search-input {
@@ -60,6 +61,13 @@ header h1 {
 .search-submit:active, .search-submit:hover, .search-submit:focus {
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(50, 50, 50, 0.9);
+}
+
+
+.search-container p {
+    color: red;
+    text-align: left;
+    margin: 10px auto;
 }
 
 
@@ -92,6 +100,13 @@ header h1 {
     border: 1px solid rgba(50, 50, 50, 0.3);
     transition: .4s ease-out;
     overflow: hidden;
+}
+
+.card:hover {
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);
+    transition: 1s ease;
 }
 
 .card-img {
