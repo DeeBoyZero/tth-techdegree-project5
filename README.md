@@ -5,7 +5,7 @@
 
 ### Techno used
 - HTML
-- CSS (variables and animations)
+- CSS (+ animations)
 - Javascript
 
 ### Extra credit infos 
