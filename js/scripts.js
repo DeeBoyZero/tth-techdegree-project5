@@ -175,6 +175,7 @@
                     document.getElementById('error-msg').innerText = 'Sorry, no result found.';
                     removeCards();
                 } else {
+                    document.getElementById('error-msg').innerText = '';
                     generateCards(filteredList);
                     generateModal(filteredList);
                 }
